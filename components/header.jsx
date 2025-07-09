@@ -12,13 +12,14 @@ const isAdmin = false
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <nav className="mx-auto px-4 py-4 flex items-center justify-between">
         <Link href={isAdminPage ? '/admin' : '/'} className='flex'> 
-        <Image src={'/logo-black.png'}
+        {/* <Image src={'/motionGo.png'}
          alt='motionGo logo'
          width={200}
          height={60}
          priority
          className="h-12 w-auto object-contain"
-        />
+        /> */}
+        <p className='text-2xl md:text-3xl font-bold text-gray-900  transition-colors duration-200'>motionGo</p>
         {isAdminPage && (
             <span className="text-xs font-extralight">admin</span>
           )}
