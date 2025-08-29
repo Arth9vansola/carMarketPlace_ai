@@ -1,4 +1,4 @@
-import HomeSearch from '@/components/home-search';
+import { HomeSearch } from "@/components/home-search";
 import {Button} from '@/components/ui/button';
 import { featuredCars } from '@/lib/data';
 import CarCard from '@/components/car-card';
@@ -13,6 +13,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SignedOut } from "@clerk/nextjs";
+
 
 
 export default function Home() {

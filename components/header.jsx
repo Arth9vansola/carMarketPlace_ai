@@ -1,13 +1,15 @@
 import React from 'react'
 import { SignedIn, SignedOut, SignInButton, UserButton, SignUpButton, SignIn } from "@clerk/nextjs";
 import Link from 'next/link';
+import { checkUser } from "@/lib/checkUser";
 import Image from 'next/image';
 import { Button } from './ui/button';
 import { ArrowLeft, CarFront, Heart, Layout } from 'lucide-react';
 
 
 const header = async({isAdminPage = false}) => {
-const isAdmin = false  
+const user = await checkUser();  
+const isAdmin = user?.role === "ADMIN";
   return (
     <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b">
       <nav className="mx-auto px-4 py-4 flex items-center justify-between">
