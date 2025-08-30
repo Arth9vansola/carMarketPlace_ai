@@ -3,11 +3,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-// import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase";
 import { auth } from "@clerk/nextjs/server";
-// import { serializeCarData } from "@/lib/helpers";
+import { serializeCarData } from "@/lib/helpers"; 
 
 // Function to convert File to base64
 async function fileToBase64(file) {
@@ -26,7 +26,7 @@ export async function processCarImageWithAI(file) {
 
     // Initialize Gemini API
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Convert image file to base64
     const base64Image = await fileToBase64(file);
