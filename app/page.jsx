@@ -13,10 +13,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SignedOut } from "@clerk/nextjs";
+import { getFeaturedCars } from "@/actions/home";
 
 
 
-export default function Home() {
+export default async function Home() {
+   const featuredCars = await getFeaturedCars();
   return (<>
      <div className='pt-20 flex flex-col'>
     <section className='relative py-16 md:py-28 dotted-background'>
