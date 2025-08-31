@@ -23,7 +23,7 @@ const isAdmin = user?.role === "ADMIN";
         /> */}
         <p className='text-2xl md:text-3xl font-bold text-gray-900  transition-colors duration-200'>motionGo</p>
         {isAdminPage && (
-            <span className="text-xs font-extralight">admin</span>
+            <span className="text-xs font-extralight"></span>
           )}
         </Link>
         <div className='flex items-center space-x-4'>
