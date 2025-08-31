@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,8 +24,8 @@ export default function RootLayout({ children }) {
           <main className="min-h-screen">{children}</main>
           <Toaster richColors />
 
-          <footer className="bg-gradient-to-r from-blue-100 to-blue-50 py-12 border-t mt-12">
-            <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          <footer className="bg-gradient-to-r from-blue-100 to-blue-50 py-8 border-t mt-12 w-full">
+            <div className="container mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 items-start">
               <div className="flex flex-col gap-2">
                 <span className="text-2xl font-extrabold text-blue-700 tracking-wide">motionGo</span>
                 <span className="text-sm text-gray-500">You deserve better, because your time matters.</span>
@@ -33,11 +34,10 @@ export default function RootLayout({ children }) {
               <div className="flex flex-col gap-2">
                 <span className="font-semibold text-gray-700 mb-2">Quick Links</span>
                 <nav className="flex flex-col gap-1 text-gray-600 text-sm">
-                  <a href="/" className="hover:text-blue-600">Home</a>
-                  <a href="/cars" className="hover:text-blue-600">Browse Cars</a>
-                  <a href="/waitlist" className="hover:text-blue-600">Waitlist</a>
-                  <a href="/sign-in" className="hover:text-blue-600">Login</a>
-                  <a href="/sign-up" className="hover:text-blue-600">Sign Up</a>
+                  <Link href="/" className="transition-colors duration-150 ease-out hover:text-blue-700 hover:bg-blue-100/60 px-2 py-1 rounded">Home</Link>
+                  <Link href="/cars" className="transition-colors duration-150 ease-out hover:text-blue-700 hover:bg-blue-100/60 px-2 py-1 rounded">Browse Cars</Link>
+                  <Link href="/sign-in" className="transition-colors duration-150 ease-out hover:text-blue-700 hover:bg-blue-100/60 px-2 py-1 rounded">Login</Link>
+                  <Link href="/sign-up" className="transition-colors duration-150 ease-out hover:text-blue-700 hover:bg-blue-100/60 px-2 py-1 rounded">Sign Up</Link>
                 </nav>
               </div>
               <div className="flex flex-col gap-2">
