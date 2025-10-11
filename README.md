@@ -20,16 +20,9 @@ Features robust authentication, dedicated admin panels, AI-driven insights, and 
 
 ## 📸 Live Demo & Preview
 
-> **🌐 Live Demo:** [motionGo Live](https://your-live-demo-link.com) *(Coming Soon)*
+> **🌐 Live Demo:** [motionGo Live](https://car-market-place-ai-ten.vercel.app/) *
 
-<details>
-<summary><strong>📱 Application Screenshots</strong></summary>
 
-| 🏠 Home Page | 🚙 Car Details | 👨‍💼 Admin Dashboard |
-|:---:|:---:|:---:|
-| *Screenshot Coming Soon* | *Screenshot Coming Soon* | *Screenshot Coming Soon* |
-
-</details>
 
 ---
 
