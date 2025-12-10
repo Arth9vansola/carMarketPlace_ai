@@ -4,6 +4,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "@/lib/prisma";
 import aj from "@/lib/arcjet";
 import { request } from "@arcjet/next";
+import {
+  safeJsonParse,
+  aiCarSearchSchema,
+  validateFileUpload,
+} from "@/lib/validation";
 
 // Function to serialize car data
 function serializeCarData(car) {
@@ -47,6 +52,12 @@ async function fileToBase64(file) {
  */
 export async function processImageSearch(file) {
   try {
+    // Validate file upload
+    validateFileUpload(file, {
+      maxSize: 10 * 1024 * 1024, // 10MB
+      allowedTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+    });
+
     // Get request data for ArcJet
     const req = await request();
 
@@ -117,9 +128,9 @@ export async function processImageSearch(file) {
     const text = response.text();
     const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
 
-    // Parse the JSON response
+    // Parse the JSON response with validation and sanitization
     try {
-      const carDetails = JSON.parse(cleanedText);
+      const carDetails = safeJsonParse(cleanedText, aiCarSearchSchema);
 
       // Return success response with data
       return {

@@ -4,6 +4,7 @@ import { serializeCarData } from "@/lib/helpers";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { searchParamsSchema } from "@/lib/validation";
 
 /**
  * Get simplified filters for the car marketplace
@@ -74,19 +75,21 @@ export async function getCarFilters() {
 /**
  * Get cars with simplified filters
  */
-export async function getCars({
-  search = "",
-  make = "",
-  bodyType = "",
-  fuelType = "",
-  transmission = "",
-  minPrice = 0,
-  maxPrice = Number.MAX_SAFE_INTEGER,
-  sortBy = "newest", // Options: newest, priceAsc, priceDesc
-  page = 1,
-  limit = 6,
-}) {
+export async function getCars(params) {
   try {
+    // Validate and set default values for search parameters
+    const {
+      search = "",
+      make = "",
+      bodyType = "",
+      fuelType = "",
+      transmission = "",
+      minPrice = 0,
+      maxPrice = Number.MAX_SAFE_INTEGER,
+      sortBy = "newest",
+      page = 1,
+      limit = 6,
+    } = searchParamsSchema.parse(params || {});
     // Get current user if authenticated
     const { userId } = await auth();
     let dbUser = null;

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { userRoleUpdateSchema } from "@/lib/validation";
 
 // Get dealership info with working hours
 export async function getDealershipInfo() {
@@ -197,10 +198,13 @@ export async function updateUserRole(userId, role) {
       throw new Error("Unauthorized: Admin access required");
     }
 
+    // Validate input
+    const validatedData = userRoleUpdateSchema.parse({ userId, role });
+
     // Update user role
     await db.user.update({
-      where: { id: userId },
-      data: { role },
+      where: { id: validatedData.userId },
+      data: { role: validatedData.role },
     });
 
     // Revalidate paths

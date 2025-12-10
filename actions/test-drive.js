@@ -4,18 +4,16 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/prisma";
 import { serializeCarData } from "@/lib/helpers";
+import { testDriveBookingSchema } from "@/lib/validation";
 
 /**
  * Books a test drive for a car
  */
-export async function bookTestDrive({
-  carId,
-  bookingDate,
-  startTime,
-  endTime,
-  notes,
-}) {
+export async function bookTestDrive(bookingData) {
   try {
+    // Validate booking data
+    const validatedData = testDriveBookingSchema.parse(bookingData);
+
     // Authenticate user
     const { userId } = await auth();
     if (!userId) throw new Error("You must be logged in to book a test drive");
@@ -29,7 +27,7 @@ export async function bookTestDrive({
 
     // Check if car exists and is available
     const car = await db.car.findUnique({
-      where: { id: carId, status: "AVAILABLE" },
+      where: { id: validatedData.carId, status: "AVAILABLE" },
     });
 
     if (!car) throw new Error("Car not available for test drive");
@@ -37,9 +35,9 @@ export async function bookTestDrive({
     // Check if slot is already booked
     const existingBooking = await db.testDriveBooking.findFirst({
       where: {
-        carId,
-        bookingDate: new Date(bookingDate),
-        startTime,
+        carId: validatedData.carId,
+        bookingDate: new Date(validatedData.bookingDate),
+        startTime: validatedData.startTime,
         status: { in: ["PENDING", "CONFIRMED"] },
       },
     });
@@ -53,19 +51,19 @@ export async function bookTestDrive({
     // Create the booking
     const booking = await db.testDriveBooking.create({
       data: {
-        carId,
+        carId: validatedData.carId,
         userId: user.id,
-        bookingDate: new Date(bookingDate),
-        startTime,
-        endTime,
-        notes: notes || null,
+        bookingDate: new Date(validatedData.bookingDate),
+        startTime: validatedData.startTime,
+        endTime: validatedData.endTime,
+        notes: validatedData.notes || null,
         status: "PENDING",
       },
     });
 
     // Revalidate relevant paths
-    revalidatePath(`/test-drive/${carId}`);
-    revalidatePath(`/cars/${carId}`);
+    revalidatePath(`/test-drive/${validatedData.carId}`);
+    revalidatePath(`/cars/${validatedData.carId}`);
 
     return {
       success: true,

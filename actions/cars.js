@@ -7,7 +7,14 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase";
 import { auth } from "@clerk/nextjs/server";
-import { serializeCarData } from "@/lib/helpers"; 
+import { serializeCarData } from "@/lib/helpers";
+import {
+  safeJsonParse,
+  aiCarDetailsSchema,
+  carDataSchema,
+  carStatusUpdateSchema,
+  validateFileUpload,
+} from "@/lib/validation"; 
 
 // Function to convert File to base64
 async function fileToBase64(file) {
@@ -19,6 +26,12 @@ async function fileToBase64(file) {
 // Gemini AI integration for carimage processing
 export async function processCarImageWithAI(file) {
   try {
+    // Validate file upload
+    validateFileUpload(file, {
+      maxSize: 10 * 1024 * 1024, // 10MB
+      allowedTypes: ["image/jpeg", "image/jpg", "image/png", "image/webp"],
+    });
+
     // Check if API key is available
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("Gemini API key is not configured");
@@ -78,34 +91,9 @@ export async function processCarImageWithAI(file) {
     const text = response.text();
     const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
 
-    // Parse the JSON response
+    // Parse the JSON response with validation and sanitization
     try {
-      const carDetails = JSON.parse(cleanedText);
-
-      // Validate the response format
-      const requiredFields = [
-        "make",
-        "model",
-        "year",
-        "color",
-        "bodyType",
-        "price",
-        "mileage",
-        "fuelType",
-        "transmission",
-        "description",
-        "confidence",
-      ];
-
-      const missingFields = requiredFields.filter(
-        (field) => !(field in carDetails)
-      );
-
-      if (missingFields.length > 0) {
-        throw new Error(
-          `AI response missing required fields: ${missingFields.join(", ")}`
-        );
-      }
+      const carDetails = safeJsonParse(cleanedText, aiCarDetailsSchema);
 
       // Return success response with data
       return {
@@ -137,6 +125,9 @@ export async function addCar({ carData, images }) {
     });
 
     if (!user) throw new Error("User not found");
+
+    // Validate car data
+    const validatedCarData = carDataSchema.parse(carData);
 
     // Create a unique folder name for this car's images
     const carId = uuidv4();
@@ -196,19 +187,19 @@ export async function addCar({ carData, images }) {
     const car = await db.car.create({
       data: {
         id: carId, // Use the same ID we used for the folder
-        make: carData.make,
-        model: carData.model,
-        year: carData.year,
-        price: carData.price,
-        mileage: carData.mileage,
-        color: carData.color,
-        fuelType: carData.fuelType,
-        transmission: carData.transmission,
-        bodyType: carData.bodyType,
-        seats: carData.seats,
-        description: carData.description,
-        status: carData.status,
-        featured: carData.featured,
+        make: validatedCarData.make,
+        model: validatedCarData.model,
+        year: validatedCarData.year,
+        price: validatedCarData.price,
+        mileage: validatedCarData.mileage,
+        color: validatedCarData.color,
+        fuelType: validatedCarData.fuelType,
+        transmission: validatedCarData.transmission,
+        bodyType: validatedCarData.bodyType,
+        seats: validatedCarData.seats,
+        description: validatedCarData.description,
+        status: validatedCarData.status,
+        featured: validatedCarData.featured,
         images: imageUrls, // Store the array of image URLs
       },
     });
@@ -330,25 +321,33 @@ export async function deleteCar(id) {
 }
 
 // Update car status or featured status
-export async function updateCarStatus(id, { status, featured }) {
+export async function updateCarStatus(id, updateData) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const updateData = {};
-
-    if (status !== undefined) {
-      updateData.status = status;
+    // Validate car ID is a UUID
+    if (!id || typeof id !== "string") {
+      throw new Error("Invalid car ID");
     }
 
-    if (featured !== undefined) {
-      updateData.featured = featured;
+    // Validate update data
+    const validatedData = carStatusUpdateSchema.parse(updateData);
+
+    const dataToUpdate = {};
+
+    if (validatedData.status !== undefined) {
+      dataToUpdate.status = validatedData.status;
+    }
+
+    if (validatedData.featured !== undefined) {
+      dataToUpdate.featured = validatedData.featured;
     }
 
     // Update the car
     await db.car.update({
       where: { id },
-      data: updateData,
+      data: dataToUpdate,
     });
 
     // Revalidate the cars list page
